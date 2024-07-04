@@ -22,12 +22,28 @@ public class MovePlayer : MonoBehaviour
     [SerializeField] int availableJumps;
 
 
+    [Header("ROTATE")]
+
+    [SerializeField] bool right;
+
+
 
     void Update()
     {
         Running();
-        Jumping();
-        RotatePlayer(); 
+
+
+        if (horizontal < 0 && !right)
+        {
+            RotatePlayer();
+        }
+        else if (horizontal > 0 && right)
+        {
+            RotatePlayer();
+        }
+
+        if (Input.GetKeyDown(KeyCode.W) && availableJumps > 0)
+            Jumping();
     }
 
 
@@ -38,28 +54,22 @@ public class MovePlayer : MonoBehaviour
         movement = new Vector2(horizontal, 0);
         movement.Normalize();
 
-        transform.Translate(movement * Time.deltaTime * speed);
-    }
-
-
-    private void Jumping()
-    {
-
-        if (Input.GetKeyDown(KeyCode.W) && availableJumps > 0)
-        {
-            rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
-
-            availableJumps -= 1;
-        }
-
+        transform.Translate(movement * Time.deltaTime * speed, Space.World);
     }
 
 
     private void RotatePlayer()
     {
-        // si horizontal es -1 escala es -1, si horizontal es 1 entonces la escala tambien
+        right = !right;
+        transform.eulerAngles = new Vector3(0, transform.eulerAngles.y + 180, 0);
     }
 
+
+    private void Jumping()
+    {
+        rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+        availableJumps -= 1;
+    }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -68,13 +78,11 @@ public class MovePlayer : MonoBehaviour
     }
 
 
-    // girar
 
     //planear
 
-    // shift dash o reemplazar el salto
+    // barra dash o reemplazar el salto
 
     // click izq ataque    rutina
     // click der disparo
-
 }
