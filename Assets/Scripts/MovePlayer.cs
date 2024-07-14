@@ -1,50 +1,65 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 public class MovePlayer : MonoBehaviour
 {
     [Header("RUN")]
     
     [SerializeField] float speed;
-
-    private float horizontal;
-
-    private Vector2 movement;
+    float horizontal;
+    Vector2 movement;
 
 
     [Header("JUMP")]
 
     [SerializeField] Rigidbody2D rb;
-
     [SerializeField] float jumpForce;
-
     [SerializeField] int availableJumps;
 
 
     [Header("ROTATE")]
 
-    [SerializeField] bool right;
+    bool right;
+
+
+    [Header("DASH")]
+
+    [SerializeField] float dashSpeed;
+    [SerializeField] float dashTime;
+    [SerializeField] float dashCooldown;
+    bool canDash = true;
+    public bool canMove = true;
+
+
+    [SerializeField] Animator animator;
 
 
 
     void Update()
     {
-        Running();
-
-
-        if (horizontal < 0 && !right)
+       if (canMove)
         {
-            RotatePlayer();
-        }
-        else if (horizontal > 0 && right)
-        {
-            RotatePlayer();
+            Running();
+
+            if (horizontal < 0 && !right)
+            {
+                RotatePlayer();
+            }
+            else if (horizontal > 0 && right)
+            {
+                RotatePlayer();
+            }
+
+            if (Input.GetKeyDown(KeyCode.W) && availableJumps > 0)
+                Jumping();
         }
 
-        if (Input.GetKeyDown(KeyCode.W) && availableJumps > 0)
-            Jumping();
+        if (Input.GetKeyDown(KeyCode.Space) && canDash)
+            StartCoroutine(Dash());
     }
+
 
 
     private void Running()
@@ -55,14 +70,45 @@ public class MovePlayer : MonoBehaviour
         movement.Normalize();
 
         transform.Translate(movement * Time.deltaTime * speed, Space.World);
+
+        animator.SetFloat("isRunning", horizontal);
     }
 
 
     private void RotatePlayer()
     {
         right = !right;
-        transform.eulerAngles = new Vector3(0, transform.eulerAngles.y + 180, 0);
+
+        Vector3 scale = transform.localScale;
+        scale.x *= -1;
+        transform.localScale = scale;
     }
+
+
+
+    private IEnumerator Dash()
+    {
+        canMove = false;
+        canDash = false;
+        rb.gravityScale = 0;
+        rb.velocity = new Vector2(dashSpeed * transform.localScale.x, 0);
+
+        animator.SetTrigger("Dash");
+
+
+        yield return new WaitForSeconds(dashTime);
+
+
+        canMove = true;
+        rb.gravityScale = 1.5f;
+
+
+        yield return new WaitForSeconds(dashCooldown);
+
+
+        canDash = true;
+    }
+
 
 
     private void Jumping()
@@ -76,13 +122,4 @@ public class MovePlayer : MonoBehaviour
         if (collision.gameObject.CompareTag("Floor"))
             availableJumps = 2;
     }
-
-
-
-    //planear
-
-    // barra dash o reemplazar el salto
-
-    // click izq ataque    rutina
-    // click der disparo
 }
