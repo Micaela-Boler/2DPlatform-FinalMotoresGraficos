@@ -4,17 +4,20 @@ using UnityEngine;
 
 public abstract class Health : MonoBehaviour
 {
-    [SerializeField] protected int health;
+    [Header("HEALTH AND DAMAGE")]
+    [SerializeField] public int health;
     [SerializeField] protected int damage;
-
     [SerializeField] protected string collisionGameObject;
 
+    [Header("PUSH CHARACTER")]
+    [SerializeField] Vector2 pushSpeed;
+    [SerializeField] protected Rigidbody2D _rb;
+    [HideInInspector] protected bool characterCanMove;
+
+    [Header("OTHERS")]
     [SerializeField] protected Animator animator;
 
 
-    [SerializeField] Vector2 pushSpeed;
-    [SerializeField] protected Rigidbody2D _rb;
-    protected bool characterCanMove;
 
     protected virtual void TakeDamage()
     {
@@ -27,9 +30,9 @@ public abstract class Health : MonoBehaviour
         
     }
 
-    protected void Push(Vector2 hitPoint, Rigidbody2D rb)
+    protected void Push(/*Vector2 hitPoint,*/ Rigidbody2D rb)
     {
-        rb.velocity = new Vector2(-pushSpeed.x * hitPoint.x, pushSpeed.y);
+        rb.velocity = new Vector2(/*-pushSpeed.x * hitPoint.x*/ 0, pushSpeed.y);
     }
 
     IEnumerator loseControl(bool canMove)
@@ -37,7 +40,7 @@ public abstract class Health : MonoBehaviour
         animator.SetBool("takingDamage", true);
         canMove = false;
 
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.5f);
 
         animator.SetBool("takingDamage", false);
         canMove = true;
@@ -50,11 +53,13 @@ public abstract class Health : MonoBehaviour
         {
             TakeDamage();
 
+            /*
             Vector2 gameObjectPosition = new Vector2(gameObject.transform.position.x, gameObject.transform.position.y);
             Vector2 collisionPoint = collision.ClosestPoint(transform.position);
             Vector2 pushDirection = gameObjectPosition - collisionPoint;
+            */
 
-            Push(pushDirection, _rb);
+            Push(/*pushDirection,*/ _rb);
         }
     }
 }

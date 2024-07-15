@@ -12,6 +12,7 @@ public class Enemy : MonoBehaviour
     [HideInInspector] protected int randomNumber = 0;
     [SerializeField] protected float rangoDeDeteccion;
     [SerializeField] float speed;
+    public bool canMove;
 
     [Header("ATTACK")]
     [SerializeField] Collider2D attackCollider;
@@ -28,6 +29,10 @@ public class Enemy : MonoBehaviour
     private void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
+
+        // PATROL //
+        
+        canMove = true;
 
         // ATTACK //
 
@@ -53,7 +58,7 @@ public class Enemy : MonoBehaviour
 
     void EnemyPatrol()
     {
-        if (Vector2.Distance(player.position, transform.position) > rangoDeDeteccion)
+        if (Vector2.Distance(player.position, transform.position) > rangoDeDeteccion && canMove)
         {
              transform.position = Vector2.MoveTowards(transform.position, movementPoints[randomNumber].position, speed * Time.deltaTime);
 
@@ -63,22 +68,22 @@ public class Enemy : MonoBehaviour
                 Spin();
             } 
         }
-        else if (Vector2.Distance(player.position, transform.position) < rangoDeDeteccion && canAttack)
+        else if (Vector2.Distance(player.position, transform.position) < rangoDeDeteccion && canAttack && canMove && gameObject.GetComponent<EnemyHealth>().health > 0)
             StartCoroutine(EnemyAttack());
     }
 
 
-    IEnumerator EnemyAttack()
+    protected virtual IEnumerator EnemyAttack()
     {
         transform.position = transform.position;
         animator.SetTrigger("isAttacking");
         canAttack = false;
 
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(3);
 
         attackCollider.enabled = false;
 
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.5f);
 
         attackCollider.enabled = true;
         canAttack = true;

@@ -34,13 +34,13 @@ public class PlayerAttack : MonoBehaviour
         animator.SetTrigger("isAttacking");
         canAttack = false;
 
-        yield return new WaitForSeconds(1);
-
-        attackCollider.enabled = false;
-
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.5f);
 
         attackCollider.enabled = true;
+
+        yield return new WaitForSeconds(0.5f);
+
+        attackCollider.enabled = false;
         canAttack = true;
     }
 }

@@ -16,7 +16,7 @@ public class MovePlayer : MonoBehaviour
 
     [SerializeField] Rigidbody2D rb;
     [SerializeField] float jumpForce;
-    [SerializeField] int availableJumps;
+    [HideInInspector] public int availableJumps;
 
 
     [Header("ROTATE")]

@@ -10,6 +10,7 @@ public class HealthBar : MonoBehaviour
     void Start()
     {
         healthSlider = GetComponent<Slider>();
+        healthSlider.value = healthSlider.maxValue;
     }
 
 
