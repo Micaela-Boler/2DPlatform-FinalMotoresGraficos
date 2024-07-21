@@ -61,7 +61,11 @@ public abstract class Health : MonoBehaviour
             Push(collision.GetContact(0).normal, _rb);
         }
 
+
         if (collision.gameObject.CompareTag("DeathZone"))
+        {
             health = 0;
+            TakeDamage();
+        }
     }
 }

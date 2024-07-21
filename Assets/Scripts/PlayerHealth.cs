@@ -4,8 +4,11 @@ using UnityEngine;
 
 public class PlayerHealth : Health
 {
-    public HealthBar healthBar;
+    [Header("PLAYER")]
+    [SerializeField] float immunityDuration;
+    //public HealthBar healthBar;
     public GameManager manager;
+
 
     [Header("SCREEN")]
     [SerializeField] GameObject screen;
@@ -14,7 +17,7 @@ public class PlayerHealth : Health
 
     private void Start()
     {
-        healthBar.StartHealth(health);
+        //healthBar.StartHealth(health);
         screen.SetActive(false);
         canTakeDamage = true;
     }
@@ -25,7 +28,7 @@ public class PlayerHealth : Health
 
         base.TakeDamage();
         StartCoroutine(Immunity());
-        healthBar.ChangeActualHealth(health);
+        //healthBar.ChangeActualHealth(health);
 
         if (health <= 0)
             StartCoroutine(waitForPanel());
@@ -46,7 +49,7 @@ public class PlayerHealth : Health
     {
         canTakeDamage = false;
 
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(immunityDuration);
 
         canTakeDamage = true;
     }
@@ -59,6 +62,5 @@ public class PlayerHealth : Health
             TakeDamage();
             //Push(-transform.position, _rb);
         }
-
     }
 }

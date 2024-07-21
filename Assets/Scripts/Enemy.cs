@@ -106,6 +106,4 @@ public abstract class Enemy : MonoBehaviour
 
         transform.localScale = scale;
     }
-
-
 }
