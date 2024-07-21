@@ -6,10 +6,13 @@ using UnityEngine.UI;
 public class HealthBar : MonoBehaviour
 {
     Slider healthSlider;
+    Animator animator;
 
     void Start()
     {
         healthSlider = GetComponent<Slider>();
+        animator = GetComponent<Animator>();
+
         healthSlider.value = healthSlider.maxValue;
     }
 
@@ -24,6 +27,7 @@ public class HealthBar : MonoBehaviour
     public void ChangeActualHealth(float ActualHealth)
     {
         healthSlider.value = ActualHealth;
+        animator.SetTrigger("TakeDamage");
     }
 
     //El valor inicial y maximo del slider es igual a la cantidad de vida actual

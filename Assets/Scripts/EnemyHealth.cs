@@ -15,6 +15,12 @@ public class EnemyHealth : Health
 
 
 
+
+    private void Start()
+    {
+        enemyCollider.enabled = true;
+    }
+
     protected override void TakeDamage()
     {
         characterCanMove = gameObject.GetComponent<Enemy>().canMove;
@@ -24,8 +30,10 @@ public class EnemyHealth : Health
         if (health <= 0)
         {
             enemyCollider.enabled = false;
+            _rb.gravityScale = 1;
 
             animator.SetTrigger("Death");
+            //cancelar enemyAttack
             EnemyDrop();
 
             Destroy(gameObject, timeToDestroyEnemy);
@@ -40,4 +48,7 @@ public class EnemyHealth : Health
 
         Instantiate(randomDrop, transform.position, Quaternion.identity);
     }
+
+
+
 }

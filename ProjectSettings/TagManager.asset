@@ -9,6 +9,7 @@ TagManager:
   - playersWeapon
   - HealthBar
   - GameManager
+  - DeathZone
   layers:
   - Default
   - TransparentFX

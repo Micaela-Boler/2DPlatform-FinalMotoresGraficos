@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,10 +7,12 @@ using UnityEngine.SocialPlatforms;
 public class MovePlayer : MonoBehaviour
 {
     [Header("RUN")]
-    
+
     [SerializeField] float speed;
+    public Vector3 scale;
     float horizontal;
     Vector2 movement;
+
 
 
     [Header("JUMP")]
@@ -26,6 +29,7 @@ public class MovePlayer : MonoBehaviour
 
     [Header("DASH")]
 
+    [SerializeField] TrailRenderer trailRenderer;
     [SerializeField] float dashSpeed;
     [SerializeField] float dashTime;
     [SerializeField] float dashCooldown;
@@ -71,7 +75,7 @@ public class MovePlayer : MonoBehaviour
 
         transform.Translate(movement * Time.deltaTime * speed, Space.World);
 
-        animator.SetFloat("isRunning", horizontal);
+        animator.SetFloat("isRunning", Mathf.Abs(horizontal));
     }
 
 
@@ -79,18 +83,20 @@ public class MovePlayer : MonoBehaviour
     {
         right = !right;
 
-        Vector3 scale = transform.localScale;
+        scale = transform.localScale;
         scale.x *= -1;
         transform.localScale = scale;
     }
 
 
-
+    
     private IEnumerator Dash()
     {
         canMove = false;
         canDash = false;
+        availableJumps = 0;
         rb.gravityScale = 0;
+        trailRenderer.emitting = true;
         rb.velocity = new Vector2(dashSpeed * transform.localScale.x, 0);
 
         animator.SetTrigger("Dash");
@@ -100,7 +106,9 @@ public class MovePlayer : MonoBehaviour
 
 
         canMove = true;
-        rb.gravityScale = 1.5f;
+        rb.gravityScale = 1;
+        trailRenderer.emitting = false;
+        rb.velocity = new Vector2(0, 0);
 
 
         yield return new WaitForSeconds(dashCooldown);
@@ -113,8 +121,10 @@ public class MovePlayer : MonoBehaviour
 
     private void Jumping()
     {
-        rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+        rb.velocity = new Vector2 (rb.velocity.x, jumpForce);
         availableJumps -= 1;
+
+        animator.SetFloat("RBVelocityY", rb.velocity.y);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

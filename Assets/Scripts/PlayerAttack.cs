@@ -8,7 +8,15 @@ public class PlayerAttack : MonoBehaviour
 
     [Header("ATTACK")]
     [SerializeField] Collider2D attackCollider;
+    [SerializeField] GameObject attackGameObject;
     [SerializeField] bool canAttack;
+
+    [Header("SHOOT")]
+
+    [SerializeField] Bullet bulletPrefab;
+    [SerializeField] Transform firingPoint;
+    [SerializeField] float attackCooldown;
+
 
     [Header("OTHERS")]
     [SerializeField] Animator animator;
@@ -16,7 +24,8 @@ public class PlayerAttack : MonoBehaviour
 
     private void Start()
     {
-        attackCollider.enabled = false;
+        //attackCollider.enabled = false;
+        attackGameObject.SetActive(false);
         canAttack = true;
     }
 
@@ -24,23 +33,56 @@ public class PlayerAttack : MonoBehaviour
     private void Update()
     {
         if (Input.GetMouseButtonDown(0) && canAttack)
-            StartCoroutine(Attack());
+            StartCoroutine(isShooting()/*Attack()*/);
     }
 
-
+    //disparo
+    /*
     IEnumerator Attack()
     {
-        transform.position = transform.position;
+
+        animator.SetTrigger("isAttacking");
+        canAttack = false;
+        //nopuede moverse
+
+        yield return new WaitForSeconds(0.3f);
+
+        //attackCollider.enabled = true;
+        attackGameObject.SetActive(true);
+
+        yield return new WaitForSeconds(0.3f);
+
+        //attackCollider.enabled = false;
+        attackGameObject.SetActive(false);
+        canAttack = true;
+    }
+    */
+    IEnumerator isShooting()
+    {
+        gameObject.GetComponent<MovePlayer>().canMove = false;
         animator.SetTrigger("isAttacking");
         canAttack = false;
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(attackCooldown);
 
-        attackCollider.enabled = true;
+        Shoot();
+        gameObject.GetComponent<MovePlayer>().canMove = true;
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(attackCooldown);
 
-        attackCollider.enabled = false;
         canAttack = true;
+    }
+
+
+    void Shoot()
+    {
+        Bullet projectile = Instantiate(bulletPrefab, firingPoint.position, transform.rotation);
+
+        if (gameObject.transform.localScale.x > 0)
+        {
+            projectile.LaunchBullet(transform.right);
+        }
+        else
+            projectile.LaunchBullet(-transform.right);  
     }
 }

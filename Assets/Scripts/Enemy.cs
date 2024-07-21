@@ -2,31 +2,34 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public abstract class Enemy : MonoBehaviour
 {
-    Transform player;
+    [SerializeField] protected Transform player;
     
     [Header("PATROL")]
     [SerializeField] protected Transform[] movementPoints;
-    [SerializeField] protected float distaciaMinima;
+    [SerializeField] protected float minDistance;
     [HideInInspector] protected int randomNumber = 0;
-    [SerializeField] protected float rangoDeDeteccion;
-    [SerializeField] float speed;
+    [SerializeField] protected float distanceToAttack;
+    [SerializeField] protected float speed;
     public bool canMove;
 
     [Header("ATTACK")]
-    [SerializeField] Collider2D attackCollider;
-    [SerializeField] bool canAttack;
+    [SerializeField] protected Collider2D attackCollider;
+    [SerializeField] protected float attackCooldown;
+    [SerializeField] protected float attackSpeed;
+    [SerializeField] protected bool canAttack;
 
     [Header("OTHERS")]
-    [SerializeField] SpriteRenderer spriteRenderer;
-    [SerializeField] Animator animator;
+    [SerializeField] protected SpriteRenderer spriteRenderer;
+    [SerializeField] protected Animator animator;
+
+    [Header("SPIN")]
+    protected Vector3 scale;
 
 
 
-
-
-    private void Awake()
+    protected void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
 
@@ -41,60 +44,67 @@ public class Enemy : MonoBehaviour
     }
 
 
-    /*
-    protected virtual void Perseguir()
-    {
-        if (Vector2.Distance(jugador.position, transform.position) < rangoDeDeteccion && jugador != null)
-            transform.position = jugador.position;
-    }
-    */
-
-    private void Update()
+    protected void Update()
     {
         EnemyPatrol();
     }
     
 
 
-    void EnemyPatrol()
+    protected virtual void EnemyPatrol()
     {
-        if (Vector2.Distance(player.position, transform.position) > rangoDeDeteccion && canMove)
+        if (Vector2.Distance(player.position, transform.position) > distanceToAttack && canMove)
         {
              transform.position = Vector2.MoveTowards(transform.position, movementPoints[randomNumber].position, speed * Time.deltaTime);
 
-            if (Vector2.Distance(transform.position, movementPoints[randomNumber].position) <= distaciaMinima)
+            if (Vector2.Distance(transform.position, movementPoints[randomNumber].position) <= minDistance)
             {
                 randomNumber = Random.Range(0, movementPoints.Length);
-                Spin();
-            } 
+                Spin(movementPoints[randomNumber], 4);
+            }
+
+            //animator.SetBool("isRunning", true);
+
         }
-        else if (Vector2.Distance(player.position, transform.position) < rangoDeDeteccion && canAttack && canMove && gameObject.GetComponent<EnemyHealth>().health > 0)
-            StartCoroutine(EnemyAttack());
+        else if (Vector2.Distance(player.position, transform.position) < distanceToAttack && canAttack && canMove && gameObject.GetComponent<EnemyHealth>().health > 0)
+        {
+            //animator.SetBool("isRunning", false);
+            StartCoroutine(EnemyAttack(attackCollider, attackSpeed, attackCooldown, "isAttacking"));
+        }
+            
     }
 
 
-    protected virtual IEnumerator EnemyAttack()
+    protected virtual IEnumerator EnemyAttack(Collider2D usingAttackCollider, float attackTime, float attackCooldown, string animationName)
     {
         transform.position = transform.position;
-        animator.SetTrigger("isAttacking");
+        animator.SetTrigger(animationName);
         canAttack = false;
 
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(attackTime);
 
-        attackCollider.enabled = false;
+        usingAttackCollider.enabled = false;
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(attackCooldown);
 
-        attackCollider.enabled = true;
+        usingAttackCollider.enabled = true;
         canAttack = true;
     }
 
-    void Spin()
+    protected virtual void Spin(Transform target, float scaleValue)
     {
-        if (transform.position.x < movementPoints[randomNumber].position.x)
-            spriteRenderer.flipX = false;
-        else 
-            spriteRenderer.flipX = true;
+        scale = transform.localScale;
+
+        if (transform.position.x > target.position.x)
+        {
+            scale.x *= -1;
+        }
+        else
+        {
+            scale.x = scaleValue;
+        }
+
+        transform.localScale = scale;
     }
 
 
